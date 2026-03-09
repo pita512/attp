@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Sun, Moon, ShieldCheck, FileText, BookOpen, LogOut, User, X, Phone, Mail, Check } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
+import { logout } from "@/lib/auth";
 
 // ── Modal shell ──────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -178,6 +180,7 @@ function InstructionModal({ onClose }: { onClose: () => void }) {
 // ── Main UserMenu ─────────────────────────────────────────────────────────────
 export default function UserMenu() {
   const { theme, toggleTheme } = useTheme();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState<"role" | "terms" | "instruction" | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -292,7 +295,7 @@ export default function UserMenu() {
             {/* Logout */}
             <div className="p-2 border-t border-gray-100 dark:border-gray-800">
               <button
-                onClick={() => setOpen(false)}
+                onClick={() => { logout(); router.push("/login"); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors group text-left"
               >
                 <div className="size-8 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover:bg-red-50 dark:group-hover:bg-red-950/30 flex items-center justify-center transition-colors shrink-0">
