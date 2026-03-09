@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { navigation, NavItem } from "@/lib/nav";
@@ -330,14 +331,14 @@ export default function Sidebar() {
   return (
     <aside className="fixed top-0 left-0 h-screen w-60 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col z-30 transition-colors">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100 dark:border-gray-800">
-        <div className="size-9 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-          <ScanSearch size={17} className="text-white" />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">NDATrace</p>
-          <p className="text-[13px] text-gray-400 mt-0.5">Truy xuất nguồn gốc</p>
-        </div>
+      <div className="flex items-center px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <Image
+          src="/media/logo.svg"
+          alt="NDATrace"
+          width={160}
+          height={40}
+          priority
+        />
       </div>
 
       {/* Search */}
