@@ -14,6 +14,8 @@ interface SectionPageProps {
   tableData: Record<string, unknown>[];
   addLabel?: string;
   actionButton?: ReactNode;
+  searchable?: boolean;
+  searchKeys?: string[];
 }
 
 export default function SectionPage({
@@ -24,6 +26,8 @@ export default function SectionPage({
   tableData,
   addLabel = "Thêm mới",
   actionButton,
+  searchable,
+  searchKeys,
 }: SectionPageProps) {
   return (
     <DashboardLayout>
@@ -58,6 +62,8 @@ export default function SectionPage({
       <DataTable
         columns={tableColumns}
         data={tableData}
+        searchable={searchable}
+        searchKeys={searchKeys}
       />
     </DashboardLayout>
   );

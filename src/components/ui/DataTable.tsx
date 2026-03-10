@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, X, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, X, ChevronDown, Search } from "lucide-react";
 
 type SortDir = "asc" | "desc" | null;
 
@@ -16,6 +16,8 @@ interface Column<T> {
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
+  searchable?: boolean;
+  searchKeys?: (keyof T | string)[];
 }
 
 function smartCompare(a: unknown, b: unknown): number {
@@ -29,11 +31,14 @@ function smartCompare(a: unknown, b: unknown): number {
 export default function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
+  searchable = false,
+  searchKeys = [],
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState("");
   const perPage = 10;
 
   // Auto-detect filterable columns (non-render, ≤15 unique values)
@@ -64,19 +69,29 @@ export default function DataTable<T extends Record<string, unknown>>({
 
   const filtered = useMemo(() => {
     let rows = data;
+    // Apply search
+    if (searchable && searchQuery.trim() && searchKeys.length > 0) {
+      const q = searchQuery.trim().toLowerCase();
+      rows = rows.filter((row) =>
+        (searchKeys as string[]).some((key) =>
+          String(row[key] ?? "").toLowerCase().includes(q)
+        )
+      );
+    }
+    // Apply dropdown filters
     for (const [key, val] of Object.entries(filters)) {
       if (!val) continue;
       rows = rows.filter((row) => String(row[key] ?? "") === val);
     }
     return rows;
-  }, [data, filters]);
+  }, [data, filters, searchable, searchQuery, searchKeys]);
 
   const sorted = useMemo(() =>
     sortKey && sortDir
       ? [...filtered].sort((a, b) => {
-          const cmp = smartCompare(a[sortKey], b[sortKey]);
-          return sortDir === "asc" ? cmp : -cmp;
-        })
+        const cmp = smartCompare(a[sortKey], b[sortKey]);
+        return sortDir === "asc" ? cmp : -cmp;
+      })
       : filtered,
     [filtered, sortKey, sortDir]
   );
@@ -89,6 +104,19 @@ export default function DataTable<T extends Record<string, unknown>>({
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
       {/* Toolbar */}
       <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 flex-wrap">
+        {/* Search input */}
+        {searchable && (
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+              placeholder="Tìm kiếm..."
+              className="pl-8 pr-3 py-2 text-[14px] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 outline-none focus:border-brand-400 transition-colors w-48"
+            />
+          </div>
+        )}
         {/* Filter dropdowns - all in one line */}
         {filterableCols.length > 0 && filterableCols.map((col) => {
           const key = String(col.key);
@@ -144,9 +172,8 @@ export default function DataTable<T extends Record<string, unknown>>({
                     onClick={() => isSortable && handleSort(key)}
                   >
                     <div className="flex items-center gap-1.5 group">
-                      <span className={`text-[14px] font-semibold uppercase tracking-wide transition-colors ${
-                        isActive ? "text-brand-600 dark:text-brand-400" : "text-gray-500 dark:text-gray-400"
-                      }`}>
+                      <span className={`text-[14px] font-semibold uppercase tracking-wide transition-colors ${isActive ? "text-brand-600 dark:text-brand-400" : "text-gray-500 dark:text-gray-400"
+                        }`}>
                         {col.label}
                       </span>
                       {isSortable && (
@@ -208,9 +235,8 @@ export default function DataTable<T extends Record<string, unknown>>({
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`min-w-[28px] h-7 rounded-lg text-[14px] font-medium transition-colors ${
-                  p === page ? "bg-brand-600 text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
-                }`}
+                className={`min-w-[28px] h-7 rounded-lg text-[14px] font-medium transition-colors ${p === page ? "bg-brand-600 text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  }`}
               >
                 {p}
               </button>
