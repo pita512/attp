@@ -6,7 +6,7 @@ export interface NavItem {
 
 export const navigation: NavItem[] = [
   {
-    label: "Dashboard",
+    label: "Tổng quan",
     href: "/dashboard",
     children: [
       { label: "Tổng quan", href: "/dashboard" },
